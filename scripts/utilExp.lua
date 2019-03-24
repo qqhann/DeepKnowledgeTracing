@@ -107,10 +107,10 @@ function semiSortedMiniBatches(dataset, mini_batch_size, trimToBatchSize)
 
 	-- round down so that minibatches are the same size
 	local trimmedAns = {}
-	if(trimToBatchSize) then
-		local nTemp = #dataset
-		local maxNum = nTemp - (nTemp % mini_batch_size)
-		local shuffled = shuffle(getKeyset(dataset))
+	if(trimToBatchSize) then -- トリムする場合
+		local nTemp = #dataset -- datasetの長さを一時保存
+		local maxNum = nTemp - (nTemp % mini_batch_size) -- mini_batch_sizeに満たない尻尾部分を捨てるmaxNumを設定する
+		local shuffled = shuffle(getKeyset(dataset)) -- シャッフルする。しかしやっていいのか？datasetの構造的に
 		for i,s in ipairs(shuffled) do
 			if(i <= maxNum) then
 				table.insert(trimmedAns, dataset[s])

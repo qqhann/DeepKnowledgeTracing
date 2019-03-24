@@ -14,7 +14,9 @@ local max_steps = nil
 -- corresponding item.
 function DataAssistMatrix:__init(params) 
 	print('Loading khan...')
+	--=====
 	--train
+	--=====
 	local root = '../data/assistments/'
 	local trainPath = root .. 'builder_train.csv'
 	local file = io.open(trainPath, "rb")
@@ -31,22 +33,24 @@ function DataAssistMatrix:__init(params)
 		if(student == nil) then 
 		    break 
 		end
-		if(student['n_answers'] >= 2) then
-			table.insert(trainData, student)
-		end
-		if(#trainData % 100 == 0) then
+		if(student['n_answers'] >= 2) then -- 回答数が2以上の時
+			table.insert(trainData, student) -- studentをtrainDataに挿入
+		end -- elseはない。つまり、回答数が1のものを排除している
+		if(#trainData % 100 == 0) then -- 100区切りで標準出力に進捗表示
 		    print(#trainData)
 		end
-		if(student['n_answers'] > longest) then
-			longest = student['n_answers']
+		if(student['n_answers'] > longest) then -- 回答数が多すぎる場合
+			longest = student['n_answers'] -- 最長記録を更新
 		end
 		totalAnswers = totalAnswers+ student['n_answers']
 	end
 
-	self.trainData = trainData
+	self.trainData = trainData -- trainDataをインスタンス変数に保存
 	io.close()
 
+	--====
 	--test
+	--====
 	local testPath = root .. 'builder_test.csv'
 	local testFile = io.open(testPath, "rb")
 	io.input(testFile)
@@ -78,9 +82,10 @@ function DataAssistMatrix:__init(params)
 end
 
 function DataAssistMatrix:loadStudent()
-	local nStepsStr = io.read()
-	local questionIdStr = io.read()
-	local correctStr = io.read()
+	-- builder_train.csvを3行ずつ読む
+	local nStepsStr = io.read() -- 1行目 1
+	local questionIdStr = io.read() -- 2行目7
+	local correctStr = io.read() -- 3行目 1
 	if(nStepsStr == nil or questionIdStr == nil or correctStr == nil) then
 		return nil
 	end
@@ -90,30 +95,30 @@ function DataAssistMatrix:loadStudent()
 		n = max_steps
 	end 
 
-	local student = {}
-	student['questionId'] = torch.zeros(n):byte()
-	for i,id in ipairs(split(questionIdStr, ",")) do
+	local student = {} -- 辞書型かな
+	student['questionId'] = torch.zeros(n):byte() -- 問題番号のベクトル
+	for i,id in ipairs(split(questionIdStr, ",")) do -- ","をsplitして処理している
 		if(i > n) then
 			break
 		end
 	    student['questionId'][i] = tonumber(id) + 1
-	    if self.questions[id] == nil then
+	    if self.questions[id] == nil then -- 処理済みのをself.questionsに登録している
 		self.questions[id] = true
-	        self.n_questions = self.n_questions + 1
+	        self.n_questions = self.n_questions + 1 -- ある問題が何回登場したか数えている
 	    end
 	
 	end
 
-	student['correct'] = torch.zeros(n):byte()
-	for i, val in ipairs(split(correctStr, ",")) do
+	student['correct'] = torch.zeros(n):byte() -- n長のベクトル？
+	for i, val in ipairs(split(correctStr, ",")) do -- ","をsplitして処理している
 		if(i > n) then
 			break
 		end
-	    student['correct'][i] = val
+	    student['correct'][i] = val -- 正解不正解のフラグ
 	end
 	
-	student['n_answers'] = n
-	return student
+	student['n_answers'] = n -- 回答の数
+	return student -- 処理したstudentを返している
 end
 
 
@@ -122,7 +127,7 @@ function DataAssistMatrix:getTestData()
 	return self.testData
 end
 
-function DataAssistMatrix:getTrainData()
+function DataAssistMatrix:getTrainData() -- trainAssistではこれを使っている
 	return self.trainData
 end
 

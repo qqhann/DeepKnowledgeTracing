@@ -91,7 +91,7 @@ function RNN:update(n_steps, rate)
 	self.layer:updateParameters(rate)
 end
 
-function RNN:fprop(batch)
+function RNN:fprop(batch) -- fprop
 	local n_steps = getNSteps(batch)
 	local n_students = #batch
 	assert(n_steps >= 1)
@@ -99,7 +99,7 @@ function RNN:fprop(batch)
 	local inputs = {};
 	local sumErr = 0;
 	local numTests = 0
-	local state = self.start:forward(torch.zeros(n_students, 1))
+	local state = self.start:forward(torch.zeros(n_students, 1)) -- forwardを呼び出し
 	for k = 1,n_steps do
 		local inputX, inputY, truth = self:getInputs(batch, k)
 		local mask = self:getMask(batch, k)
@@ -125,7 +125,7 @@ function RNN:load(dir)
 	self:rollOutNetwork()
 end
 
-function RNN:calcGrad(batch, rate, alpha)
+function RNN:calcGrad(batch, rate, alpha) -- calcGrad
 	local n_steps = getNSteps(batch)
 	local n_students = #batch
 	if(n_steps > self.max_steps) then
@@ -134,7 +134,7 @@ function RNN:calcGrad(batch, rate, alpha)
 	assert(n_steps <= self.max_steps)
 
 	local maxNorm = 0
-	local sumErr, numTests, inputs = self:fprop(batch)
+	local sumErr, numTests, inputs = self:fprop(batch) -- fpropでバッチを処理
 
 	local parentGrad = torch.zeros(n_students, self.n_hidden)
 	for k = n_steps,1,-1 do

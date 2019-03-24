@@ -19,13 +19,13 @@ function run()
 
 	math.randomseed(os.time())
 
-	data = DataAssistMatrix()
+	data = DataAssistMatrix() -- dataの初期化
 	collectgarbage()
 
-	local n_hidden = 200
+	local n_hidden = 200 -- 隠れ層 200
 	local decay_rate = 1 
 	local init_rate = 30
-	local mini_batch_size = 100
+	local mini_batch_size = 100 -- mini batchサイズ 100
 	local dropoutPred = true
 	local max_grad = 5e-5 
 
@@ -40,9 +40,9 @@ function run()
 	print('making rnn...')
 	local rnn = RNN{
 		dropoutPred = dropoutPred,
-		n_hidden = n_hidden,
-		n_questions = data.n_questions,
-		maxGrad = max_grad,
+		n_hidden = n_hidden, -- 200
+		n_questions = data.n_questions, -- 質問の数
+		maxGrad = max_grad, -- 5e-5
 		maxSteps = 4290,
 		compressedSensing = true,
 		compressedDim = 100
@@ -63,11 +63,11 @@ function run()
 	file:write('-----\n')
 	file:write('i\taverageErr\tauc\ttestPred\trate\tclock\n')
 	file:flush()
-	trainMiniBatch(rnn, data, mini_batch_size, file, fileId)
+	trainMiniBatch(rnn, data, mini_batch_size, file, fileId) -- trainMiniBatch。dataも渡している。
 	file:close()
 end
 
-function trainMiniBatch(rnn, data, mini_batch_size, file, modelId)
+function trainMiniBatch(rnn, data, mini_batch_size, file, modelId) -- 引数にdataが含まれる
 	print('train')
 	local epochIndex = START_EPOCH
 	local blob_size = 50
@@ -75,7 +75,7 @@ function trainMiniBatch(rnn, data, mini_batch_size, file, modelId)
 	while(true) do
 		local rate = getLearningRate(epochIndex)
 		local startTime = os.time()
-		local miniBatches = semiSortedMiniBatches(data:getTrainData(), blob_size, true)
+		local miniBatches = semiSortedMiniBatches(data:getTrainData(), blob_size, true) -- getTrainDataの結果を処理。semiSortedMiniBatchesはutilExp.luaに定義
 		local totalTests = getTotalTests(miniBatches)
 		collectgarbage()
 		local sumErr = 0
@@ -84,10 +84,10 @@ function trainMiniBatch(rnn, data, mini_batch_size, file, modelId)
 		rnn:zeroGrad(350)
 		local miniTests = 0
 		local miniErr = 0
-		for i,batch in ipairs(miniBatches) do
+		for i,batch in ipairs(miniBatches) do -- miniBatchesのバッチごとに処理
 			local alpha = blob_size / totalTests
 			--local alpha = blob_size / getNTests(batch)
-			local err, tests, maxNorm = rnn:calcGrad(batch, rate, alpha)
+			local err, tests, maxNorm = rnn:calcGrad(batch, rate, alpha) -- rnn:calcGradを呼び出し
 			sumErr = sumErr + err
 			numTests = numTests + tests
 			collectgarbage()
